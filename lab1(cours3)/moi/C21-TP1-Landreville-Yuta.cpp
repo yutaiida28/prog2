@@ -116,6 +116,7 @@ char cursor[3][3] =							// informations pour l'affichage du curseur
 
 int main()
 {
+	
 	setwsize(WIN_Y, WIN_X);								// redimensionner la fenêtre de la console
 	show(true);											// afficher (oui/non) le trait d'affichage de la console
 
@@ -146,35 +147,114 @@ int main()
 
 	*/
 
-
 	// Continuez ici...
 	//affichage titre est damié
 	
 	XY xy = {};
 	LC lc = {};
 	
-
 	// titre
-
+	const string titre  = "D\x90""COUVREZ ET AMASSEZ 15 CASES $$$$";
+	gotoxy((WIN_X - titre.size())/2,2);
+	cout << titre;
 	//case
-	gotoxy(START_X, START_Y);
-
+	Case box = {};
+	
 	while (lc.l < LIG )
 	{
-		for (lc.c = 0 ; lc.c < COL; lc.c++)
-		{
 		xy.x = START_X;
 		xy.y = START_Y;
-		gotoxy(xy.x + (DELTA_X * lc.c), xy.y + (DELTA_Y * lc.l));
-		cout << "a";
-		lc.c++;
 
+		for (lc.c = 0 ; lc.c < COL; lc.c++)
+		{
+
+			box = damier[lc.l][lc.c];
+			setcolor(map[box].color);
+			string ligne(CASE_X, map[box].c);
+
+			for (size_t i = 0; i < CASE_Y; i++)
+			{
+				gotoxy(xy.x + (DELTA_X * lc.c), xy.y + (DELTA_Y * lc.l)+i);
+				cout << ligne;
+			}
 		}
 		lc.l++;
-		
-		
-		
-
 	}
+	gotoxy(START_X, START_Y);
+	setcolor(Color::wht);
+	//structure curseur
+	int curseurx = 0;
+	int curseury = 0;
+
+	char curseur[CASE_Y][CASE_X] = {};
+	for (curseury = 0; curseury < CASE_Y; curseury++)
+	{
+		for (curseurx = 0; curseurx < CASE_X; curseurx++)
+		{
+			/*
+			if (curseury == 0 && curseurx == 0)
+			{
+				curseur[curseury][curseurx] = { '\xC9' };
+			}
+			else  if (curseury == 0 && curseurx == CASE_X - 1)
+			{
+				curseur[curseury][curseurx] = { '\xBB' };
+			}
+			else if (curseury == 0)
+			{
+				curseur[curseury][curseurx] = { '\xCB' };
+			}
+			else if(curseury == CASE_Y - 1 && curseurx == 0)
+			{
+				curseur[curseury][curseurx] = { '\xC8' };
+			}
+			else if (curseury == CASE_Y - 1 && curseurx == CASE_X - 1)
+			{
+				curseur[curseury][curseurx] = { '\xBC' };
+			}
+			else  if (curseurx == 0)
+			{
+				curseur[curseury][curseurx] = { '\xCC' };
+			}
+			else  if (curseurx == CASE_X - 1)
+			{
+				curseur[curseury][curseurx] = { '\xB9' };
+			}
+			else if (curseury == CASE_Y-1)
+			{
+				curseur[curseury][curseurx] = { '\xCA' };
+			}
+			else
+				curseur[curseury][curseurx] = { '\xCE' };
+			*/
+			if (curseury == 0)
+			{
+				curseur[curseury][curseurx] = { '\xCB' };
+			}
+			else  if (curseurx == 0)
+			{
+				curseur[curseury][curseurx] = { '\xCC' };
+			}
+			else  if (curseurx == CASE_X - 1)
+			{
+				curseur[curseury][curseurx] = { '\xB9' };
+			}
+			else if (curseury == CASE_Y - 1)
+			{
+				curseur[curseury][curseurx] = { '\xCA' };
+			}
+			else
+				curseur[curseury][curseurx] = { '\xCE' };
+		}
+	}
+	curseur[0][0] = { '\xC9' };
+	curseur[0][CASE_X-1] = { '\xBB' };
+	curseur[CASE_Y - 1][0] = { '\xC8' };
+	curseur[CASE_Y - 1][CASE_X - 1] = { '\xBC' };
+
+	//afficher curseur
+
 	_getch();
 }
+
+
