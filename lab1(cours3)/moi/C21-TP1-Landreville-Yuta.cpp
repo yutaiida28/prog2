@@ -133,22 +133,15 @@ void affiche_titre()
 	setcolor(Color::wht);
 }
 */
-void affiche_case(int c, size_t l, size_t x)
+void affiche_case(int type, size_t c, size_t l)
 {
-	Case box;
-	
-	
-	for (c = 0; c < CASE_Y; c++)
+	string ligne(CASE_X, map[type].c);
+	for (int i = 0; i < CASE_Y; i++)
 	{
-		string ligne(CASE_X, map[c].c);
-		for (int i = 0; i < CASE_Y; i++)
-		{
-			gotoxy(START_X + (DELTA_X * c), START_Y + (DELTA_Y * l) + i);
-			cout << ligne;
-		}
+		gotoxy(START_X + (DELTA_X * c), START_Y + (DELTA_Y * l) + i);
+		cout << ligne;
 	}
-		
-
+	gotoxy(START_X, START_Y); 
 }
 int main()
 {
@@ -196,23 +189,13 @@ int main()
 	{
 	Case box = {};
 	
-
 	while (lc.l < LIG)
 	{
 		for (lc.c = 0; lc.c < COL; lc.c++)
 		{
 			box = damier[lc.l][lc.c];
-			//int a = box;
+			setcolor(map[box].color);
 			affiche_case(box,lc.c, lc.l);
-			
-			//setcolor(map[box].color);
-			//string ligne(CASE_X, map[box].c);
-
-			//for (int i = 0; i < CASE_Y; i++)
-			//{
-			//	gotoxy(xy.x + (DELTA_X * lc.c), xy.y + (DELTA_Y * lc.l) + i);
-			//	cout << ligne;
-			//}
 		}
 		lc.l++;
 	}
