@@ -2,9 +2,10 @@
 #include <conio.h>
 #include <string>
 #include <iomanip>
+#include <ctime>
 // vos autres includes ici
 
-#include "prog2/cvm 23.h"
+#include "../../cvm 23.h"
 
 // PRAGMA
 #pragma warning (disable:6031)		// valeur de retour ignorée '_getch'
@@ -101,7 +102,7 @@ Style map[5] =								// les style pour toutes les cases
 	{ Color::blu, '\xB2' },
 	{ Color::grn, '\x24' },					// ex: map[CD].color == Color::grn		==> la couleur à utiliser
 	{ Color::pur, '\xB0' },
-	{ Color::blk, '\x00' }
+	{ Color::blk, '\x20' }
 };
 
 // AFFICHAGE DU CURSEUR
@@ -112,6 +113,7 @@ char cursor[3][3] =							// informations pour l'affichage du curseur
 	{ '\xCC', '\xCE', '\xB9' },
 	{ '\xC8', '\xCA', '\xBC' }
 };
+//char curseur[CASE_Y][CASE_X] = { {}, {}, {} };
 
 
 void affiche_titre()
@@ -120,84 +122,30 @@ void affiche_titre()
 	gotoxy((WIN_X - titre.size())/2,2);
 	cout << titre;
 }
-/*void affiche_curseur(XY, curseur[CASE_Y][CASE_X])
-{
-	for (int yi = 0; yi < CASE_Y; yi++)
-	{
-		for (int xi = 0; xi < CASE_X; xi++)
-		{
-			gotoxy(xy.x + (DELTA_X * m.from.c) + xi, xy.y + (DELTA_Y * m.from.l) + yi);
-			cout << curseur[yi][xi];
-		}
-	}
-	setcolor(Color::wht);
-}
-*/
+
 void position(size_t c, size_t l, int i)
 {
 	gotoxy(START_X + (DELTA_X * c), START_Y + (DELTA_Y * l) + i);
 }
+
 void affiche_case(LC lc)
 {
 	Case box = {};
-
 	
-			box = damier[lc.l][lc.c];
-			setcolor(map[box].color);
-			string ligne(CASE_X, map[box].c);
-			for (int i = 0; i < CASE_Y; i++)
-			{
-				position(lc.c, lc.l, i);
-				cout << ligne;
-			}
-		
+	box = damier[lc.l][lc.c];
+	
+	setcolor(map[box].color);
+	string ligne(CASE_X, map[box].c);
+	for (int i = 0; i < CASE_Y; i++)
+	{
+		position(lc.c, lc.l, i);
+		cout << ligne;
+	}	
+
 }
-	
 
-int main()
+void affiche_damier(LC lc)
 {
-
-	setwsize(WIN_Y, WIN_X);								// redimensionner la fenêtre de la console
-	show(true);											// afficher (oui/non) le trait d'affichage de la console
-
-	Move m;
-	m.from = { 0,0 };										// coordonnée logique {l,c} du curseur au départ du jeu
-
-	/*
-		NOTE 1)
-
-			m.to = {?,?};								// déterminer la case d'arrivée du curseur avec la direction de la flèche demandée
-
-			// ex: flèche droite ==>
-
-			m.to.l = m.from.l;							// la ligne n'a pas changée
-			m.to.c = m.from.c + 1;						// déplacement d'une colonne vers la droite
-
-		NOTE 2)
-
-			if ( damier[m.to.l][m.to.c] == CD )		// pour vérifier de quelle case il s'agit dans le tableau damier
-				...
-		NOTE 3)
-
-			Utilisez le calcul énoncé dans la spécification au point 10) pour retrouver la coordonnée graphique (x,y) d'une case à partir de sa coordonnée logique (l,c)
-
-		NOTE 4)
-
-			m.from = m.to;								// ne pas oublier que l'arrivée deviendra le départ du déplacement suivant
-
-	*/
-
-	// Continuez ici...
-	//affichage titre est damié
-
-	XY xy = { START_X , START_Y };
-	LC lc = {};
-
-
-	// affichez titre
-	affiche_titre();
-
-	//affichez damié
 	while (lc.l < LIG)
 	{
 		for (lc.c = 0; lc.c < COL; lc.c++)
@@ -207,16 +155,73 @@ int main()
 		lc.l++;
 	}
 	setcolor(Color::wht);
+}
 
+bool deplacement_dispo( LC lc)
+{
+	LC position = lc;
+	Case box = {};
+	int direction = 8;
+	int option  = 8; 
+	bool disponible = true;
+	
+	for (size_t i = 0; i < direction; i++)
+	{
+		lc = position;
+		switch (i)			
+		{
+		case 0:		lc.c--; lc.l--; 	break;
+		case 1:		lc.c;	lc.l--;		break;
+		case 2:		lc.c++; lc.l--;		break;
+		case 3:		lc.c--; lc.l;		break;
+		case 4:		lc.c++; lc.l;		break;
+		case 5:		lc.c--; lc.l++;		break;
+		case 6:		lc.c;	lc.l++;		break;
+		case 7:		lc.c++; lc.l++;		break;
+		}
+		box = damier[lc.l][lc.c]; 
+
+		if (lc.l < 0 || lc.c < 0 || lc.l > LIG || lc.c > COL)
+		{
+			option--;
+		}
+		else if(box == CV)
+		{
+			option--;
+		}
+
+	}
+	if (option == 0)
+	{
+		disponible = false;
+	}
+	return disponible;
+}
+
+
+
+int main()
+{
+	setwsize(WIN_Y, WIN_X);								// redimensionner la fenêtre de la console
+	show(true);											// afficher (oui/non) le trait d'affichage de la console
+
+	Move m;
+	m.from = { 0,0 };										// coordonnée logique {l,c} du curseur au départ du jeu
+	XY xy = { START_X , START_Y };
+	LC lc = {};
+
+	affiche_titre();									// affichez titre
+
+	affiche_damier(lc);									//affichez damié
+	
 	gotoxy(START_X, START_Y);
-
 
 	//structure curseur
 
 	int curseurx = 0;
 	int curseury = 0;
-
 	char curseur[CASE_Y][CASE_X] = {};
+	
 	for (curseury = 0; curseury < CASE_Y; curseury++)
 	{
 		for (curseurx = 0; curseurx < CASE_X; curseurx++)
@@ -250,16 +255,24 @@ int main()
 	curseur[0][CASE_X - 1] = { '\xBB' };
 	curseur[CASE_Y - 1][0] = { '\xC8' };
 	curseur[CASE_Y - 1][CASE_X - 1] = { '\xBC' };
-
-	//afficher curseur
-	//affiche_curseur(xy, & curseur[CASE_Y][CASE_X]);
+	
+	
 
 	Case box = {};
 	m.to = { 0,0 };
 	bool partie_en_cours = true;
+	bool victoir = true;
+	int point = 0;
+	int deplacement = 0;
+	bool chronometre = false;
+	int  debut = 0;
+	
+
 	do
 	{
-		setcolor(Color::yel);					// la fonction setcolor est spécifiée dans cvm 21.h
+			//afficher curseur
+			//affiche_curseur(xy, & curseur[CASE_Y][CASE_X]);
+		setcolor(Color::yel);					
 		for (int yi = 0; yi < CASE_Y; yi++)
 		{
 			for (int xi = 0; xi < CASE_X; xi++)
@@ -270,22 +283,33 @@ int main()
 		}
 		setcolor(Color::wht);
 
-		gotoxy(START_X, START_Y);
+			//afficher le pointage
+		gotoxy(START_X + (DELTA_X * 11) - 3, START_Y + (DELTA_Y * LIG));
 
-
-		uint8_t v;
-
-		//do
-		//{
-
+		setcolor(Color::grn);
+		cout << "$$$$ : " << setw(2) << right << point;
+		setcolor(Color::wht);
+		cout << left;
 		
+		
+		uint8_t v;
+		bool valid = false;
+		do
+		{
 			v = _getch();
 			if (v == 0 || v == 224)
 			{
-				if (_kbhit())				// soyons prudent tout de même !
+				if (_kbhit())							// soyons prudent tout de même !
 				{
-					v = _getch();			// lire le code ascii suivant
+					v = _getch();						// lire le code ascii suivant
+					if (chronometre == false)			//chronometre
+					{
+						debut = time(0);
 
+						chronometre = true;
+					}
+					
+					
 					switch (Ak(v))			// Ak(c) ==> convertir c en Ak
 					{
 					case Ak::up_left:		m.to.c--; m.to.l--; 	break;
@@ -298,55 +322,91 @@ int main()
 					case Ak::down_right:	m.to.c++; m.to.l++;		break;
 					}
 
-
-					if (m.to.l >= 0 && m.to.c >= 0 && m.to.l < LIG  && m.to.c < COL )
+					if (m.to.l >= 0 && m.to.c >= 0 && m.to.l < LIG && m.to.c < COL) // validation du deplacement (verifier qui ne sor pas du tableau)
 					{
-
-						if (damier[m.to.l][m.to.c] != CV)
+						if (damier[m.to.l][m.to.c] != CV)							// validation de la case si elle est accesible 
 						{
-							box = damier[m.from.l][m.from.c];
-							damier[m.from.l][m.from.c] = futur[box];
-							m.from = m.to;
+							lc = m.from;
+							affiche_case(lc);
 
-
-
+							
+							valid = true;
 						}
 						else
 						{
 							m.to = m.from;
+							valid = false;
 						}
 					}
 					else
 					{
 						m.to = m.from;
+						valid = false;
 					}
 				}
 			}
-		//} while (true);
-	
+
+		} while (valid == false);	
+		deplacement++; // calculer combien de d/placement
+		
+
+		position(0, LIG, 0);			//afficher de  ou on c'est deplacer a ou 
+		setcolor(Color::yel);
+		cout << "move : ( " << m.from.l << "," << m.from.c <<" )-- > ( " << m.to.l << "," << m.to.c <<")";
+		setcolor(Color::wht);
 
 
-		//prendre deplacement 
-		//valide possibilite avec LIG COL
-		//ok ranger dans m.to
-		//change dammier utiliser fonction future
-		//envoiyer a dessine curseur 
-		//reaffice m.f fonction
-		//affiche curseur
+		m.from = m.to;					// calculer combien de point on a cumuler
+		box = damier[m.from.l][m.from.c];
+		if (box == CD)
+		{
+			point++;
+		}
+		damier[m.from.l][m.from.c] = futur[box];
+
+		lc = m.from; 
+		if (deplacement_dispo(lc) == false)			// verrifier si la partie est fini si impossible de se deplacer
+		{
+			partie_en_cours = false;
+			victoir = false;
+		}
+		else if (point == 15)						// v/rifier si on a pas completer le jeux 
+		{
+			partie_en_cours = false;
+			victoir = true;
+		}
+		
+
+	} while (partie_en_cours == true);
+
+	clrscr();
+	int fin = time(0);					//arret chronometre 
+	char input = 'a';
+
+	if (victoir == true)				// affichage victoire
+	{
+		setcolor(Color::grn);
+		cout << "\n" << "VICTOIR ! \n\n";
 
 
+	}
+	else								// affichage de deffaite
+	{
+		setcolor(Color::red);
+		cout << "\n" << "\x90""CHEC ! \n\n";
+		
+	}												// afficher detail  
+	cout << setw(28) << "  Total des points" << ": " << point << " sur sur un objectif de 15\n\n";
+	cout << setw(28) << "  Total des déplacements" << ": " << deplacement << endl << endl ;
+	cout << setw(28) << "  Temps écoulé" << ": " << fin - debut << " sec" << endl << endl << endl;
 
+	cout << "  Appuyez sur 'Q' pour quitter";
 
+	do											//fonction pour quitter
+	{
+		input  = _getch();
+		input = toupper(input);
 
-
-
-
-
-
-
-
-	} while (partie_en_cours != false);
-
-
+	} while (input != 'Q');
 	_getch();
 }
