@@ -4,7 +4,7 @@
 #include <iomanip>
 // vos autres includes ici
 
-#include "../../cvm 23.h"
+#include "prog2/cvm 23.h"
 
 // PRAGMA
 #pragma warning (disable:6031)		// valeur de retour ignorée '_getch'
@@ -133,30 +133,41 @@ void affiche_titre()
 	setcolor(Color::wht);
 }
 */
-void affiche_case(int type, size_t c, size_t l)
+void position(size_t c, size_t l, int i)
 {
-	string ligne(CASE_X, map[type].c);
-	for (int i = 0; i < CASE_Y; i++)
-	{
-		gotoxy(START_X + (DELTA_X * c), START_Y + (DELTA_Y * l) + i);
-		cout << ligne;
-	}
-	gotoxy(START_X, START_Y); 
+	gotoxy(START_X + (DELTA_X * c), START_Y + (DELTA_Y * l) + i);
 }
+void affiche_case(LC lc)
+{
+	Case box = {};
+
+	
+			box = damier[lc.l][lc.c];
+			setcolor(map[box].color);
+			string ligne(CASE_X, map[box].c);
+			for (int i = 0; i < CASE_Y; i++)
+			{
+				position(lc.c, lc.l, i);
+				cout << ligne;
+			}
+		
+}
+	
+
 int main()
 {
-	
+
 	setwsize(WIN_Y, WIN_X);								// redimensionner la fenêtre de la console
 	show(true);											// afficher (oui/non) le trait d'affichage de la console
 
 	Move m;
-	m.from = {0,0};										// coordonnée logique {l,c} du curseur au départ du jeu
+	m.from = { 0,0 };										// coordonnée logique {l,c} du curseur au départ du jeu
 
 	/*
 		NOTE 1)
 
 			m.to = {?,?};								// déterminer la case d'arrivée du curseur avec la direction de la flèche demandée
-			
+
 			// ex: flèche droite ==>
 
 			m.to.l = m.from.l;							// la ligne n'a pas changée
@@ -178,34 +189,30 @@ int main()
 
 	// Continuez ici...
 	//affichage titre est damié
-	
+
 	XY xy = { START_X , START_Y };
 	LC lc = {};
-	
+
+
 	// affichez titre
 	affiche_titre();
 
 	//affichez damié
-	{
-	Case box = {};
-	
 	while (lc.l < LIG)
 	{
 		for (lc.c = 0; lc.c < COL; lc.c++)
 		{
-			box = damier[lc.l][lc.c];
-			setcolor(map[box].color);
-			affiche_case(box,lc.c, lc.l);
+			affiche_case(lc);
 		}
 		lc.l++;
 	}
 	setcolor(Color::wht);
-	}
+
 	gotoxy(START_X, START_Y);
-	
+
 
 	//structure curseur
-	
+
 	int curseurx = 0;
 	int curseury = 0;
 
@@ -243,11 +250,12 @@ int main()
 	curseur[0][CASE_X - 1] = { '\xBB' };
 	curseur[CASE_Y - 1][0] = { '\xC8' };
 	curseur[CASE_Y - 1][CASE_X - 1] = { '\xBC' };
-	
+
 	//afficher curseur
 	//affiche_curseur(xy, & curseur[CASE_Y][CASE_X]);
 
-
+	Case box = {};
+	m.to = { 0,0 };
 	bool partie_en_cours = true;
 	do
 	{
@@ -262,25 +270,83 @@ int main()
 		}
 		setcolor(Color::wht);
 
+		gotoxy(START_X, START_Y);
 
 
+		uint8_t v;
 
+		//do
+		//{
 
-
-
-
-
-
-
-
-
-
-
-
-
-	} while (partie_en_cours /*!*/ = false);
-
-	
-	_getch();
 		
+			v = _getch();
+			if (v == 0 || v == 224)
+			{
+				if (_kbhit())				// soyons prudent tout de même !
+				{
+					v = _getch();			// lire le code ascii suivant
+
+					switch (Ak(v))			// Ak(c) ==> convertir c en Ak
+					{
+					case Ak::up_left:		m.to.c--; m.to.l--; 	break;
+					case Ak::up:			m.to.c; m.to.l--;		break;
+					case Ak::up_right:		m.to.c++; m.to.l--;		break;
+					case Ak::left:			m.to.c--; m.to.l;		break;
+					case Ak::right:			m.to.c++; m.to.l;		break;
+					case Ak::down_left:		m.to.c--; m.to.l++;		break;
+					case Ak::down:			m.to.c; m.to.l++;		break;
+					case Ak::down_right:	m.to.c++; m.to.l++;		break;
+					}
+
+
+					if (m.to.l >= 0 && m.to.c >= 0 && m.to.l < LIG  && m.to.c < COL )
+					{
+
+						if (damier[m.to.l][m.to.c] != CV)
+						{
+							box = damier[m.from.l][m.from.c];
+							damier[m.from.l][m.from.c] = futur[box];
+							m.from = m.to;
+
+
+
+						}
+						else
+						{
+							m.to = m.from;
+						}
+					}
+					else
+					{
+						m.to = m.from;
+					}
+				}
+			}
+		//} while (true);
+	
+
+
+		//prendre deplacement 
+		//valide possibilite avec LIG COL
+		//ok ranger dans m.to
+		//change dammier utiliser fonction future
+		//envoiyer a dessine curseur 
+		//reaffice m.f fonction
+		//affiche curseur
+
+
+
+
+
+
+
+
+
+
+
+
+	} while (partie_en_cours != false);
+
+
+	_getch();
 }
